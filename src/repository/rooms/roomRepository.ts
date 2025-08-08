@@ -30,10 +30,6 @@ export class roomRepository {
     }
 
     async deleteRoom(number: number) {
-        return prisma.room.delete({
-            where: {
-                number
-            }
-        });
+        return 
     }
 }

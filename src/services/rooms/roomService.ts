@@ -1,37 +1,54 @@
-import { IRoomRepository } from "../../repository/rooms/IRoomRepository";
+import prisma from "../../database/prisma-client";
+import { httpError } from "../../utils/httpError";
 import { IRoomService } from "./IRoomService";
 
 export class RoomService implements IRoomService {
-    private roomRepository: IRoomRepository;
-
-    constructor(roomRepository: IRoomRepository) {
-        this.roomRepository = roomRepository;
-    }
 
     async listRooms() {
-        return this.roomRepository.listRooms();
+        return await prisma.room.findMany();
     }
 
     async createRoom(number:number, type:string, pricePerNight: number, status:string) {
-        return this.roomRepository.createRoom(number, type, pricePerNight, status);
+        const existingRoom = await prisma.room.findUnique({where: {number}});
+
+
+        if (existingRoom) throw new httpError("This user already exists", 409);
+
+        return prisma.room.create({
+            data: {
+                number,
+                type,
+                pricePerNight,
+                status
+            }
+        });
     }
 
     async updateRoom(number:number, type:string, pricePerNight: number, status:string) {
-        const updatedRoom = await this.roomRepository.updateRoom(number, type, pricePerNight, status);
+        const room = await prisma.room.findUnique({where: {number}});
 
-        if (!updatedRoom) {
-            return null;
-        }
+        if (!room) throw new httpError("User not found", 404);
 
-        return updatedRoom;
+        const updateRoom = await prisma.room.update({
+            where: {
+                number
+            },
+            data: {
+                type,
+                pricePerNight,
+                status
+            }
+        });
+
+        return updateRoom;
     }
 
     async deleteRoom(number: number) {
-        const deletedRoom = await this.roomRepository.deleteRoom(number);
+        const room = await prisma.room.findUnique({where: {number}});
 
-        if (!deletedRoom) {
-            return null;
-        }
+        if (!room) throw new httpError("User not found", 404);
+
+        const deletedRoom = await prisma.room.delete({where: {number}});
 
         return deletedRoom;
     }

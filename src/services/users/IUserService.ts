@@ -1,7 +1,7 @@
 import { User } from "../../models/User";
 
 export interface IUserService {
-    userView(id:string): Promise<Omit<User, "password"> | null>;
+    userView(id:string): Promise<Omit<User, "password">>;
     createUser(name: string, email: string, password: string): Promise<User>;
     updateUser(requestUserId: string, targetUserId: string, name: string, password: string): Promise<User>;
     deleteUser(requestUserId: string, targetUserId: string): Promise<User>;

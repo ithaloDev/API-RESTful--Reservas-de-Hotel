@@ -15,7 +15,7 @@ export class RoomController {
 
     async listRooms(_req: FastifyRequest, reply: FastifyReply) {
         const rooms = await this.roomService.listRooms();
-        reply.send(rooms);
+        reply.status(200).send(rooms);
     }
 
     async createRoom(req: FastifyRequest, reply: FastifyReply) {
@@ -23,34 +23,29 @@ export class RoomController {
 
         const room = await this.roomService.createRoom(number, type, pricePerNight, status);
 
-        if (!room) {
-            return reply.status(400).send({ message: 'Room already exists' });
-        }
-
-        return reply.status(200).send(room);
+        return reply.status(201).send({
+            message: "Room created sucessfully",
+            room: { number: room.number, type: room.type, pricePerNight: room.pricePerNight, status: room.status }
+        });
     }
 
     async updateRoom(req: FastifyRequest, reply: FastifyReply) {
         const { type, pricePerNight, status } = req.body as Room;
-        const { number} = req.params as Room;
+        const { number } = req.params as {number: number};
 
         const room = await this.roomService.updateRoom(number, type, pricePerNight, status);
 
-        if (!room) {
-            return reply.status(200).send({ message: 'Room not found' });
-        }
-
-        return reply.status(200).send(room);
+        return reply.status(200).send({
+            message: "Room updated sucessfully",
+            room: { number: room.number, type: room.type, pricePerNight: room.pricePerNight, status: room.status }
+        });
     }
 
     async deleteRoom(req: FastifyRequest, reply: FastifyReply) {
         const { number } = req.params as Room;
 
-        const room = await this.roomService.deleteRoom(number);
-
-        if (!room) {
-            return reply.status(200).send({ message: "Room not found" })
-        }
-        return reply.status(200).send(room);
+        await this.roomService.deleteRoom(number);
+        
+        return reply.status(200).send({message: "Room deleted sucessfully"});
     }
 }
